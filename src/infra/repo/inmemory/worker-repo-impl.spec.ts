@@ -1,13 +1,14 @@
 import { Worker } from '@domain/model/worker';
 import { InMemoryWorkerRepo } from './worker-repo-impl';
 
-const newRepo = () => {
-  return new InMemoryWorkerRepo();
-};
-
 describe('InMemoryWorkerRepo', () => {
+  let repo: InMemoryWorkerRepo;
+
+  beforeEach(() => {
+    repo = new InMemoryWorkerRepo();
+  });
+
   it('can save and retrieve worker', async () => {
-    const repo = newRepo();
     const worker = Worker.createWorker('test-save-1');
 
     const result = await repo.saveWorker(worker);
@@ -19,7 +20,6 @@ describe('InMemoryWorkerRepo', () => {
   });
 
   it('can list all workers', async () => {
-    const repo = newRepo();
     const worker1 = Worker.createWorker('test-list-1');
     const worker2 = Worker.createWorker('test-list-2');
     const worker3 = Worker.createWorker('test-list-3');
@@ -41,7 +41,6 @@ describe('InMemoryWorkerRepo', () => {
   });
 
   it('should not save dupliated worker', async () => {
-    const repo = newRepo();
     const worker = Worker.createWorker('test-duplicate');
 
     await repo.saveWorker(worker);
@@ -55,7 +54,6 @@ describe('InMemoryWorkerRepo', () => {
   });
 
   it('can update worker info', async () => {
-    const repo = newRepo();
     const worker = Worker.createWorker('test-update');
 
     await repo.saveWorker(worker);

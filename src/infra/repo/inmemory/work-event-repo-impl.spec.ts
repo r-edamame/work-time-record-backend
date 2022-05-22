@@ -3,11 +3,13 @@ import { InMemoryWorkEventRepo } from './work-event-repo-impl';
 import dayjs from 'dayjs';
 import { Worker } from '@domain/model/worker';
 
-const newRepo = () => {
-  return new InMemoryWorkEventRepo();
-};
-
 describe('InMemoryWorkEventRepo', () => {
+  let repo: InMemoryWorkEventRepo;
+
+  beforeEach(() => {
+    repo = new InMemoryWorkEventRepo();
+  });
+
   it('can save and retrieve dailyActivity', async () => {
     const worker = Worker.createWorker('test-save');
     const activity: DailyActivity = {
@@ -18,8 +20,6 @@ describe('InMemoryWorkEventRepo', () => {
         { command: 'finishWork', timestamp: dayjs('2022-05-22T18:30:00') },
       ],
     };
-
-    const repo = newRepo();
 
     const result = await repo.saveDailyActivity(worker.id, activity);
     expect(result).toBe(true);
@@ -42,8 +42,6 @@ describe('InMemoryWorkEventRepo', () => {
         { command: 'finishWork', timestamp: dayjs('2022-05-21T18:30:00') },
       ],
     };
-
-    const repo = newRepo();
 
     await repo.saveDailyActivity(worker.id, activity);
 
