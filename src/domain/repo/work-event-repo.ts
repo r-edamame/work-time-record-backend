@@ -7,5 +7,5 @@ export interface WorkEventRepo {
    */
   getDailyActivity(workerId: string, date: dayjs.Dayjs): Promise<DailyActivity>;
 
-  saveDailyActivity(workeId: string, activity: DailyActivity): Promise<true>;
+  saveDailyActivity(workerId: string, activity: DailyActivity): Promise<true>;
 }
