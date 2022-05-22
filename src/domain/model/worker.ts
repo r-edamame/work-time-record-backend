@@ -10,6 +10,10 @@ export class Worker {
     return this._name;
   }
 
+  changeName(name: string) {
+    this._name = name;
+  }
+
   static createWorker(name: string): Worker {
     const id = `worker_${uuid()}`;
     return new Worker(id, name);
