@@ -30,6 +30,7 @@
     "baseUrl": "./",                                  /* Specify the base directory to resolve non-relative module names. */
     "paths": {
       "@domain/*": ["src/domain/*"],
+      "@infra/*": ["src/infra/*"],
       "@util/*": ["src/util/*"]
     },
     // "rootDirs": [],                                   /* Allow multiple folders to be treated as one when resolving modules. */
