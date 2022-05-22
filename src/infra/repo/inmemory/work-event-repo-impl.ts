@@ -5,8 +5,15 @@ import { Dayjs } from 'dayjs';
 
 type RawWorkEvent = WorkEvent & { workerId: string };
 
-class InMemoryWorkEventRepo implements WorkEventRepo {
-  workEvents: RawWorkEvent[];
+const toWorkEvent = (r: RawWorkEvent): WorkEvent => {
+  return {
+    command: r.command,
+    timestamp: r.timestamp,
+  };
+};
+
+export class InMemoryWorkEventRepo implements WorkEventRepo {
+  private workEvents: RawWorkEvent[];
 
   constructor() {
     this.workEvents = [];
@@ -22,7 +29,7 @@ class InMemoryWorkEventRepo implements WorkEventRepo {
       });
 
     return {
-      daily: events,
+      daily: events.map(toWorkEvent),
     };
   }
 
