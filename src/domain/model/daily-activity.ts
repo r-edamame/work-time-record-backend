@@ -15,11 +15,6 @@ export class DailyActivity {
     return this.daily[this.daily.length - 1];
   }
 
-  getCurrentStatus(): WorkStatus {
-    const lastEvent = this.lastEvent;
-    if (lastEvent === undefined) return 'beforeWork';
-    else return nextStatus(lastEvent.command);
-  }
   get lastTimestamp(): dayjs.Dayjs | undefined {
     return this.firstEvent?.timestamp || undefined;
   }
@@ -29,6 +24,12 @@ export class DailyActivity {
   }
   get finishedAt(): dayjs.Dayjs | undefined {
     return this.lastEvent?.timestamp || undefined;
+  }
+
+  getCurrentStatus(): WorkStatus {
+    const lastEvent = this.lastEvent;
+    if (lastEvent === undefined) return 'beforeWork';
+    else return nextStatus(lastEvent.command);
   }
 
   addEvent(event: WorkEvent): Either<WorkStatus> {
@@ -54,6 +55,10 @@ export class DailyActivity {
     }
 
     return [new DailyActivity([...events]), undefined];
+  }
+
+  static new(): DailyActivity {
+    return new DailyActivity([]);
   }
 }
 
