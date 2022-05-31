@@ -1,4 +1,5 @@
-import { DailyActivity, WorkEvent } from '@domain/model/work-event';
+import { DailyActivity } from '@domain/model/daily-activity';
+import { WorkEvent } from '@domain/model/work-event';
 import dayjs from 'dayjs';
 
 export interface WorkEventRepo {

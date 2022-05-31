@@ -1,20 +1,16 @@
 import { Worker } from '@domain/model/worker';
 import { availableCommands, WorkCommand } from '@domain/model/work-command';
 import { WorkEventRepo } from '@domain/repo/work-event-repo';
-import { addEventToActivity, currentStatus, DailyActivity, WorkEvent } from '@domain/model/work-event';
+import { WorkEvent } from '@domain/model/work-event';
 import dayjs from 'dayjs';
+import { DailyActivity } from '@domain/model/daily-activity';
 
 export class WorkCommandService {
   constructor(private readonly workEventRepo: WorkEventRepo) {}
 
-  async getAvailableCommands(worker: Worker): Promise<WorkCommand[]> {
-    const today = dayjs();
-    const activity = await this.workEventRepo.getDailyActivity(worker.id, today);
-    const [status, error] = currentStatus(activity);
-    if (error) {
-      throw error;
-    }
-    return availableCommands(status);
+  async getAvailableCommands(worker: Worker, date: dayjs.Dayjs): Promise<WorkCommand[]> {
+    const activity = await this.workEventRepo.getDailyActivity(worker.id, date);
+    return availableCommands(activity.getCurrentStatus());
   }
 
   async recordCommand(worker: Worker, command: WorkCommand, timestamp: dayjs.Dayjs): Promise<DailyActivity> {
@@ -23,10 +19,10 @@ export class WorkCommandService {
       command,
       timestamp,
     };
-    const [added, error] = addEventToActivity(event, activity);
+    const [status, error] = activity.addEvent(event);
     if (error) throw error;
-    await this.workEventRepo.saveDailyActivity(worker.id, added);
+    await this.workEventRepo.saveDailyActivity(worker.id, activity);
 
-    return added;
+    return activity;
   }
 }

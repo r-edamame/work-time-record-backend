@@ -1,4 +1,5 @@
-import { DailyActivity, WorkEvent } from '@domain/model/work-event';
+import { DailyActivity } from '@domain/model/daily-activity';
+import { WorkEvent } from '@domain/model/work-event';
 import { WorkEventRepo } from '@domain/repo/work-event-repo';
 import { removeWithIndicies } from '@util/array';
 import { Dayjs } from 'dayjs';
@@ -28,17 +29,22 @@ export class InMemoryWorkEventRepo implements WorkEventRepo {
         return a.timestamp.diff(b.timestamp);
       });
 
-    return {
-      daily: events.map(toWorkEvent),
-    };
+    const [activity, error] = DailyActivity.fromEvents(events.map(toWorkEvent));
+
+    if (error) {
+      throw new Error();
+    }
+    return activity;
   }
 
   async saveDailyActivity(workerId: string, activity: DailyActivity): Promise<true> {
-    if (activity.daily.length <= 0) return true;
+    const events = activity.getEvents();
 
-    const date = activity.daily[0].timestamp;
+    if (events.length <= 0) return true;
 
-    const events = this.workEvents
+    const date = events[0].timestamp;
+
+    const stored = this.workEvents
       .map((e, ix): [RawWorkEvent, number] => [e, ix])
       .filter(([e, ix]) => {
         return e.workerId === workerId && e.timestamp.isSame(date, 'day');
@@ -46,11 +52,11 @@ export class InMemoryWorkEventRepo implements WorkEventRepo {
 
     const same = (a: WorkEvent, b: WorkEvent): boolean => a.command === b.command && a.timestamp.isSame(b.timestamp);
 
-    const unsavedEvents = activity.daily.filter((e) => {
-      return events.find(([d, ix]) => same(e, d)) === undefined;
+    const unsavedEvents = events.filter((e) => {
+      return stored.find(([d, ix]) => same(e, d)) === undefined;
     });
-    const lostEvents = events.filter(([e, ix]) => {
-      return activity.daily.find((d) => same(e, d)) === undefined;
+    const lostEvents = stored.filter(([e, ix]) => {
+      return events.find((d) => same(e, d)) === undefined;
     });
 
     this.workEvents = removeWithIndicies(

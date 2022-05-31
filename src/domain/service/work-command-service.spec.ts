@@ -26,7 +26,9 @@ describe('WorkCommandService', () => {
 
     for (const [command, timestamp, availables] of events) {
       await service.recordCommand(worker, command, timestamp);
-      const availableCommands = await service.getAvailableCommands(worker);
+
+      // 利用可能なコマンドが正しいかチェック
+      const availableCommands = await service.getAvailableCommands(worker, dayjs('2022-05-22T00:00'));
       expect(availableCommands.length).toEqual(availables.length);
       availableCommands.forEach((c) => {
         expect(availables.includes(c)).toBe(true);
@@ -34,10 +36,11 @@ describe('WorkCommandService', () => {
     }
 
     const activity = await eventRepo.getDailyActivity(worker.id, dayjs('2022-05-22T00:00:00'));
-    expect(activity.daily.length).toEqual(4);
+    const savedEvents = activity.getEvents();
+    expect(savedEvents.length).toEqual(4);
     events.forEach(([command, timestamp], ix) => {
-      expect(activity.daily[ix].command).toEqual(command);
-      expect(activity.daily[ix].timestamp.isSame(timestamp)).toBe(true);
+      expect(savedEvents[ix].command).toEqual(command);
+      expect(savedEvents[ix].timestamp.isSame(timestamp)).toBe(true);
     });
   });
 });
