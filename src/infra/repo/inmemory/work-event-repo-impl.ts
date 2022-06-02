@@ -1,8 +1,8 @@
 import { DailyActivity } from '@domain/model/daily-activity';
+import { Day, HasDayRange } from '@domain/model/date';
 import { WorkEvent } from '@domain/model/work-event';
 import { WorkEventRepo } from '@domain/repo/work-event-repo';
 import { removeWithIndicies } from '@util/array';
-import { Dayjs } from 'dayjs';
 
 type RawWorkEvent = WorkEvent & { workerId: string };
 
@@ -20,10 +20,10 @@ export class InMemoryWorkEventRepo implements WorkEventRepo {
     this.workEvents = [];
   }
 
-  async getDailyActivity(workerId: string, date: Dayjs): Promise<DailyActivity> {
+  async getDailyActivity(workerId: string, date: Day): Promise<DailyActivity> {
     const events = this.workEvents
       .filter((e) => {
-        return e.workerId === workerId && e.timestamp.isSame(date, 'day');
+        return e.workerId === workerId && e.timestamp.asDay().isSame(date);
       })
       .sort((a, b) => {
         return a.timestamp.diff(b.timestamp);
@@ -32,7 +32,7 @@ export class InMemoryWorkEventRepo implements WorkEventRepo {
     const [activity, error] = DailyActivity.fromEvents(events.map(toWorkEvent));
 
     if (error) {
-      throw new Error();
+      throw error;
     }
     return activity;
   }
@@ -42,12 +42,12 @@ export class InMemoryWorkEventRepo implements WorkEventRepo {
 
     if (events.length <= 0) return true;
 
-    const date = events[0].timestamp;
+    const date = events[0].timestamp.asDay();
 
     const stored = this.workEvents
       .map((e, ix): [RawWorkEvent, number] => [e, ix])
       .filter(([e, ix]) => {
-        return e.workerId === workerId && e.timestamp.isSame(date, 'day');
+        return e.workerId === workerId && date.in(e.timestamp);
       });
 
     const same = (a: WorkEvent, b: WorkEvent): boolean => a.command === b.command && a.timestamp.isSame(b.timestamp);

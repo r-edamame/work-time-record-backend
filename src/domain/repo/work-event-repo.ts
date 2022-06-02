@@ -1,12 +1,11 @@
 import { DailyActivity } from '@domain/model/daily-activity';
-import { WorkEvent } from '@domain/model/work-event';
-import dayjs from 'dayjs';
+import { Day, HasDayRange } from '@domain/model/date';
 
 export interface WorkEventRepo {
   /**
    * returned DailyActivity should be ordered with timestamp ascending
    */
-  getDailyActivity(workerId: string, date: dayjs.Dayjs): Promise<DailyActivity>;
+  getDailyActivity(workerId: string, day: Day): Promise<DailyActivity>;
 
   saveDailyActivity(workerId: string, activity: DailyActivity): Promise<true>;
 }

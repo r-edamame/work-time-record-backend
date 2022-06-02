@@ -1,7 +1,7 @@
 import { WorkCommand } from './work-command';
-import dayjs from 'dayjs';
+import { Minute } from './date';
 
 export type WorkEvent = {
   command: WorkCommand;
-  timestamp: dayjs.Dayjs;
+  timestamp: Minute;
 };

@@ -2,7 +2,7 @@ import { Either } from '@util/types';
 import { availableCommands, nextStatus } from './work-command';
 import { WorkEvent } from './work-event';
 import { WorkStatus } from './work-status';
-import dayjs from 'dayjs';
+import { Minute } from './date';
 
 export class DailyActivity {
   private constructor(private daily: WorkEvent[]) {}
@@ -15,14 +15,14 @@ export class DailyActivity {
     return this.daily[this.daily.length - 1];
   }
 
-  get lastTimestamp(): dayjs.Dayjs | undefined {
+  get lastTimestamp(): Minute | undefined {
     return this.firstEvent?.timestamp || undefined;
   }
 
-  get startedAt(): dayjs.Dayjs | undefined {
+  get startedAt(): Minute | undefined {
     return this.firstEvent?.timestamp || undefined;
   }
-  get finishedAt(): dayjs.Dayjs | undefined {
+  get finishedAt(): Minute | undefined {
     return this.lastEvent?.timestamp || undefined;
   }
 
