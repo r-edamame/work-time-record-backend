@@ -33,11 +33,10 @@ export class DailyActivity {
   }
 
   addEvent(event: WorkEvent): Either<WorkStatus> {
-    if (!availableCommands(this.getCurrentStatus()).includes(event.command)) {
-      return [undefined, new Error('invalid command')];
-    }
-    if (this.lastTimestamp && !event.timestamp.isAfter(this.lastTimestamp)) {
-      return [undefined, new Error('invalid timestamp')];
+    const [_canAdd, invalidErr] = isAvailableEvent(this.getCurrentStatus(), this.lastTimestamp, event);
+
+    if (invalidErr) {
+      return [undefined, invalidErr];
     }
 
     this.daily.push(event);
@@ -87,4 +86,20 @@ const getCurrentStatus = (events: WorkEvent[]): Either<WorkStatus> => {
   }
 
   return [status, undefined];
+};
+
+const isAvailableEvent = (
+  status: WorkStatus,
+  lastTimestamp: Minute | undefined,
+  addedEvent: WorkEvent,
+): Either<true> => {
+  if (!availableCommands(status).includes(addedEvent.command)) {
+    return [undefined, new Error('invalid command')];
+  }
+
+  if (lastTimestamp && !addedEvent.timestamp.isAfter(lastTimestamp)) {
+    return [undefined, new Error('invalid timestamp')];
+  }
+
+  return [true, undefined];
 };
