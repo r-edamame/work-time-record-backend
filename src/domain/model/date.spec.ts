@@ -1,7 +1,84 @@
 import dayjs from 'dayjs';
-import { Between, Day, Month } from './date';
+import { Between, Day, Minute, Month } from './date';
 
 const pad = (n: number) => String(n).padStart(2, '0');
+
+describe('Minute', () => {
+  it('should judge two minute is same with isSame', () => {
+    let d1: dayjs.Dayjs;
+    let d2: dayjs.Dayjs;
+
+    d1 = dayjs('2022-06-02T10:15');
+    d2 = dayjs('2022-06-02T10:15');
+    expect(new Minute(d1).isSame(new Minute(d2))).toBe(true);
+    expect(new Minute(d2).isSame(new Minute(d1))).toBe(true);
+
+    d1 = dayjs('2022-06-02T10:15').startOf('minute');
+    d2 = dayjs('2022-06-02T10:15').endOf('minute');
+    expect(new Minute(d1).isSame(new Minute(d2))).toBe(true);
+    expect(new Minute(d2).isSame(new Minute(d1))).toBe(true);
+
+    d1 = dayjs('2022-06-02T10:15').startOf('minute');
+    d2 = dayjs('2022-06-02T10:14').endOf('minute');
+    expect(new Minute(d1).isSame(new Minute(d2))).toBe(false);
+    expect(new Minute(d2).isSame(new Minute(d1))).toBe(false);
+
+    d1 = dayjs('2022-06-02T10:15').startOf('minute');
+    d2 = dayjs('2022-06-02T10:16').startOf('minute');
+    expect(new Minute(d1).isSame(new Minute(d2))).toBe(false);
+    expect(new Minute(d2).isSame(new Minute(d1))).toBe(false);
+  });
+
+  it('should judge two minutes order with isAfter', () => {
+    let d1: dayjs.Dayjs;
+    let d2: dayjs.Dayjs;
+
+    d1 = dayjs('2022-06-02T10:15');
+    d2 = dayjs('2022-06-02T10:15');
+    expect(new Minute(d1).isAfter(new Minute(d2))).toBe(false);
+    expect(new Minute(d2).isAfter(new Minute(d1))).toBe(false);
+
+    d1 = dayjs('2022-06-02T10:15').startOf('minute');
+    d2 = dayjs('2022-06-02T10:15').endOf('minute');
+    expect(new Minute(d1).isAfter(new Minute(d2))).toBe(false);
+    expect(new Minute(d2).isAfter(new Minute(d1))).toBe(false);
+
+    d1 = dayjs('2022-06-02T10:15').startOf('minute');
+    d2 = dayjs('2022-06-02T10:14').endOf('minute');
+    expect(new Minute(d1).isAfter(new Minute(d2))).toBe(true);
+    expect(new Minute(d2).isAfter(new Minute(d1))).toBe(false);
+
+    d1 = dayjs('2022-06-02T10:15').startOf('minute');
+    d2 = dayjs('2022-06-02T10:16').startOf('minute');
+    expect(new Minute(d1).isAfter(new Minute(d2))).toBe(false);
+    expect(new Minute(d2).isAfter(new Minute(d1))).toBe(true);
+  });
+
+  it('should judge two minutes order with isBefore', () => {
+    let d1: dayjs.Dayjs;
+    let d2: dayjs.Dayjs;
+
+    d1 = dayjs('2022-06-02T10:15');
+    d2 = dayjs('2022-06-02T10:15');
+    expect(new Minute(d1).isBefore(new Minute(d2))).toBe(false);
+    expect(new Minute(d2).isBefore(new Minute(d1))).toBe(false);
+
+    d1 = dayjs('2022-06-02T10:15').startOf('minute');
+    d2 = dayjs('2022-06-02T10:15').endOf('minute');
+    expect(new Minute(d1).isBefore(new Minute(d2))).toBe(false);
+    expect(new Minute(d2).isBefore(new Minute(d1))).toBe(false);
+
+    d1 = dayjs('2022-06-02T10:15').startOf('minute');
+    d2 = dayjs('2022-06-02T10:14').endOf('minute');
+    expect(new Minute(d1).isBefore(new Minute(d2))).toBe(false);
+    expect(new Minute(d2).isBefore(new Minute(d1))).toBe(true);
+
+    d1 = dayjs('2022-06-02T10:15').startOf('minute');
+    d2 = dayjs('2022-06-02T10:16').startOf('minute');
+    expect(new Minute(d1).isBefore(new Minute(d2))).toBe(true);
+    expect(new Minute(d2).isBefore(new Minute(d1))).toBe(false);
+  });
+});
 
 describe('Day', () => {
   it('should judge two days is same with isSame', () => {
