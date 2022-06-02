@@ -1,5 +1,40 @@
 import dayjs from 'dayjs';
 
+export class Minute {
+  private _minute: dayjs.Dayjs;
+  constructor(minute: dayjs.Dayjs) {
+    this._minute = minute.clone();
+  }
+
+  private unit: 'minute' = 'minute';
+
+  isSame(minute: Minute): boolean {
+    return this._minute.isSame(minute._minute, this.unit);
+  }
+
+  isAfter(minute: Minute): boolean {
+    return this._minute.isAfter(minute._minute, this.unit);
+  }
+  isBefore(minute: Minute): boolean {
+    return this._minute.isBefore(minute._minute, this.unit);
+  }
+
+  asDay(): Day {
+    return new Day(this._minute);
+  }
+  asMonth(): Month {
+    return new Month(this._minute);
+  }
+
+  diff(minute: Minute): number {
+    return this._minute.diff(minute._minute, this.unit);
+  }
+
+  static fromDateString(date: string): Minute {
+    return new Minute(dayjs(date));
+  }
+}
+
 export class Day {
   private _day: dayjs.Dayjs;
   constructor(day: dayjs.Dayjs) {
