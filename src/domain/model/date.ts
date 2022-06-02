@@ -1,5 +1,9 @@
 import dayjs from 'dayjs';
 
+export interface HasDayRange {
+  enumerateDays(): Day[];
+}
+
 export class Minute {
   private _minute: dayjs.Dayjs;
   constructor(minute: dayjs.Dayjs) {
@@ -41,6 +45,13 @@ export class Day {
     this._day = day.clone();
   }
 
+  getStartMinute(): Minute {
+    return new Minute(this._day.clone().startOf('day'));
+  }
+  getEndMinute(): Minute {
+    return new Minute(this._day.clone().endOf('day'));
+  }
+
   isSame(day: Day): boolean {
     return this._day.isSame(day._day, 'day');
   }
@@ -52,15 +63,27 @@ export class Day {
     return this._day.isBefore(day._day, 'day');
   }
 
+  in(time: Minute): boolean {
+    return !(time.isBefore(this.getStartMinute()) || time.isAfter(this.getEndMinute()));
+  }
+
   next(): Day {
     return new Day(this._day.clone().add(1, 'day'));
   }
+
+  asMonth(): Month {
+    return new Month(this._day);
+  }
+
+  static fromDateString(date: string): Day {
+    return new Day(dayjs(date));
+  }
 }
 
-export class Month {
+export class Month implements HasDayRange {
   private _month: dayjs.Dayjs;
   constructor(month: dayjs.Dayjs) {
-    this._month = month;
+    this._month = month.clone();
   }
 
   getStart(): Day {
@@ -81,16 +104,24 @@ export class Month {
     return this._month.isBefore(month._month, 'month');
   }
 
-  in(day: Day): boolean {
-    return !(day.isBefore(this.getStart()) || day.isAfter(this.getEnd()));
+  in(time: Day | Minute): boolean {
+    if (time instanceof Day) {
+      return !(time.isBefore(this.getStart()) || time.isAfter(this.getEnd()));
+    } else {
+      return this.in(time.asDay());
+    }
   }
 
   enumerateDays(): Day[] {
     return enumerate(this.getStart(), this.getEnd());
   }
+
+  static fromDateString(date: string): Month {
+    return new Month(dayjs(date));
+  }
 }
 
-export class Between {
+export class Between implements HasDayRange {
   private _from: Day;
   private _to: Day;
   constructor(from: Day, to: Day) {
