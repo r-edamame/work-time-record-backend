@@ -2,7 +2,7 @@ import { Worker } from '@domain/model/worker';
 import { WorkerRepo } from '@domain/repo/worker-repo';
 
 export class InMemoryWorkerRepo implements WorkerRepo {
-  private workers: Worker[];
+  workers: Worker[];
 
   constructor() {
     this.workers = [];

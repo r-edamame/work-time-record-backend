@@ -14,7 +14,7 @@ const toWorkEvent = (r: RawWorkEvent): WorkEvent => {
 };
 
 export class InMemoryWorkEventRepo implements WorkEventRepo {
-  private workEvents: RawWorkEvent[];
+  workEvents: RawWorkEvent[];
 
   constructor() {
     this.workEvents = [];
