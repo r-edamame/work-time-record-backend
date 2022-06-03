@@ -7,5 +7,7 @@ export interface WorkEventRepo {
    */
   getDailyActivity(workerId: string, day: Day): Promise<DailyActivity>;
 
+  listDailyActivities(workerId: string, period: HasDayRange): Promise<DailyActivity[]>;
+
   saveDailyActivity(workerId: string, activity: DailyActivity): Promise<true>;
 }

@@ -37,6 +37,12 @@ export class InMemoryWorkEventRepo implements WorkEventRepo {
     return activity;
   }
 
+  async listDailyActivities(workerId: string, period: HasDayRange): Promise<DailyActivity[]> {
+    const days = period.enumerateDays();
+    const activities = await Promise.all(days.map((day) => this.getDailyActivity(workerId, day)));
+    return activities;
+  }
+
   async saveDailyActivity(workerId: string, activity: DailyActivity): Promise<true> {
     const events = activity.getEvents();
 
