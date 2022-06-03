@@ -2,10 +2,17 @@ import { Either } from '@util/types';
 import { availableCommands, nextStatus } from './work-command';
 import { WorkEvent } from './work-event';
 import { WorkStatus } from './work-status';
-import { Minute } from './date';
+import { Day, Minute } from './date';
 
 export class DailyActivity {
-  private constructor(private daily: WorkEvent[]) {}
+  private constructor(private _workerId: string, private _day: Day, private daily: WorkEvent[]) {}
+
+  get workerId(): string {
+    return this._workerId;
+  }
+  get day(): Day {
+    return this._day;
+  }
 
   private get firstEvent(): WorkEvent | undefined {
     return this.daily[0];
@@ -33,7 +40,7 @@ export class DailyActivity {
   }
 
   addEvent(event: WorkEvent): Either<WorkStatus> {
-    const [_canAdd, invalidErr] = isAvailableEvent(this.getCurrentStatus(), this.lastTimestamp, event);
+    const [_canAdd, invalidErr] = isAvailableEvent(this.day, this.getCurrentStatus(), this.lastTimestamp, event);
 
     if (invalidErr) {
       return [undefined, invalidErr];
@@ -47,58 +54,37 @@ export class DailyActivity {
     return [...this.daily];
   }
 
-  static fromEvents(events: WorkEvent[]): Either<DailyActivity> {
-    const [status, error] = getCurrentStatus(events);
-    if (error) {
-      return [undefined, error];
+  static fromEvents(workerId: string, day: Day, events: WorkEvent[]): Either<DailyActivity> {
+    const activity = DailyActivity.new(workerId, day);
+    for (const event of events) {
+      const [_status, error] = activity.addEvent(event);
+      if (error) {
+        return [undefined, error];
+      }
     }
-
-    return [new DailyActivity([...events]), undefined];
+    return [activity, undefined];
   }
 
-  static new(): DailyActivity {
-    return new DailyActivity([]);
+  static new(workerId: string, day: Day): DailyActivity {
+    return new DailyActivity(workerId, day, []);
   }
 }
 
-const getCurrentStatus = (events: WorkEvent[]): Either<WorkStatus> => {
-  const [firstEvent, ...remEvents] = events;
-  if (firstEvent === undefined) {
-    return ['beforeWork', undefined];
-  }
-
-  if (firstEvent.command !== 'startWork') {
-    return [undefined, new Error('first command must be "startWork"')];
-  }
-
-  let status: WorkStatus = 'working';
-  let lastTimestamp = firstEvent.timestamp;
-  for (const event of remEvents) {
-    if (!availableCommands(status).includes(event.command)) {
-      return [undefined, new Error('invalid command')];
-    }
-    if (!event.timestamp.isAfter(lastTimestamp)) {
-      return [undefined, new Error('invalid timestamp')];
-    }
-
-    lastTimestamp = event.timestamp;
-    status = nextStatus(event.command);
-  }
-
-  return [status, undefined];
-};
-
 const isAvailableEvent = (
+  day: Day,
   status: WorkStatus,
   lastTimestamp: Minute | undefined,
   addedEvent: WorkEvent,
 ): Either<true> => {
-  if (!availableCommands(status).includes(addedEvent.command)) {
-    return [undefined, new Error('invalid command')];
+  if (
+    (!lastTimestamp && !day.in(addedEvent.timestamp)) ||
+    (lastTimestamp && !addedEvent.timestamp.isAfter(lastTimestamp))
+  ) {
+    return [undefined, new Error('invalid timestamp')];
   }
 
-  if (lastTimestamp && !addedEvent.timestamp.isAfter(lastTimestamp)) {
-    return [undefined, new Error('invalid timestamp')];
+  if (!availableCommands(status).includes(addedEvent.command)) {
+    return [undefined, new Error('invalid command')];
   }
 
   return [true, undefined];
