@@ -11,15 +11,15 @@ describe('InMemoryWorkEventRepo', () => {
     repo = new InMemoryWorkEventRepo();
   });
 
-  const forceFromEvents = (events: WorkEvent[]): DailyActivity => {
-    const [activity, error] = DailyActivity.fromEvents(events);
+  const forceFromEvents = (worker: Worker, day: Day, events: WorkEvent[]): DailyActivity => {
+    const [activity, error] = DailyActivity.fromEvents(worker.id, day, events);
     if (error) throw error;
     return activity;
   };
 
   it('can save and retrieve dailyActivity', async () => {
     const worker = Worker.createWorker('test-save');
-    const activity: DailyActivity = forceFromEvents([
+    const activity: DailyActivity = forceFromEvents(worker, Day.fromDateString('2022-05-22'), [
       { command: 'startWork', timestamp: Minute.fromDateString('2022-05-22T10:30:00') },
       { command: 'startRest', timestamp: Minute.fromDateString('2022-05-22T13:00:00') },
       { command: 'resumeWork', timestamp: Minute.fromDateString('2022-05-22T14:30:00') },
@@ -40,7 +40,7 @@ describe('InMemoryWorkEventRepo', () => {
 
   it('can update dailyActivity', async () => {
     const worker = Worker.createWorker('test-update');
-    const activity: DailyActivity = forceFromEvents([
+    const activity: DailyActivity = forceFromEvents(worker, Day.fromDateString('2022-05-21'), [
       { command: 'startWork', timestamp: Minute.fromDateString('2022-05-21T10:30:00') },
       { command: 'startRest', timestamp: Minute.fromDateString('2022-05-21T13:00:00') },
       { command: 'resumeWork', timestamp: Minute.fromDateString('2022-05-21T14:30:00') },
@@ -49,7 +49,7 @@ describe('InMemoryWorkEventRepo', () => {
 
     await repo.saveDailyActivity(worker.id, activity);
 
-    const restingChanged: DailyActivity = forceFromEvents([
+    const restingChanged: DailyActivity = forceFromEvents(worker, Day.fromDateString('2022-05-21'), [
       { command: 'startWork', timestamp: Minute.fromDateString('2022-05-21T10:30:00') },
       { command: 'startRest', timestamp: Minute.fromDateString('2022-05-21T14:00:00') },
       { command: 'resumeWork', timestamp: Minute.fromDateString('2022-05-21T15:30:00') },

@@ -1,9 +1,10 @@
 import { Either } from '@util/types';
 import { DailyActivity } from './daily-activity';
-import { Minute } from './date';
+import { Day, Minute } from './date';
 import { WorkCommand } from './work-command';
 import { WorkEvent } from './work-event';
 import { WorkStatus } from './work-status';
+import { Worker } from './worker';
 
 describe('DailyActivity', () => {
   const noerror = <T>([_, error]: Either<T>) => {
@@ -11,7 +12,8 @@ describe('DailyActivity', () => {
   };
 
   it('can add events', () => {
-    const activity = DailyActivity.new();
+    const worker = Worker.createWorker('worker');
+    const activity = DailyActivity.new(worker.id, Day.fromDateString('2022-05-31'));
 
     const testdata: [WorkEvent, WorkStatus][] = [
       [{ command: 'startWork', timestamp: Minute.fromDateString('2022-05-31T10:30') }, 'working'],
@@ -30,7 +32,8 @@ describe('DailyActivity', () => {
   });
 
   it('occur error when add invalid command', () => {
-    const activity = DailyActivity.new();
+    const worker = Worker.createWorker('test');
+    const activity = DailyActivity.new(worker.id, Day.fromDateString('2022-05-31'));
     let timestamp: Minute;
 
     const test = (coms: WorkCommand[]) => {
@@ -66,9 +69,15 @@ describe('DailyActivity', () => {
   });
 
   it('occur error when add invalid timestamp', () => {
-    const activity = DailyActivity.new();
-    let timestamp = Minute.fromDateString('2022-10-31T10:00');
+    const worker = Worker.createWorker('test');
+    const activity = DailyActivity.new(worker.id, Day.fromDateString('2022-10-31'));
+    let timestamp: Minute;
 
+    // 開始時間がその日ではない場合
+    timestamp = Minute.fromDateString('2022-10-30T10:00');
+    expect(activity.addEvent({ command: 'startWork', timestamp })[1]?.message).toBe('invalid timestamp');
+
+    timestamp = Minute.fromDateString('2022-10-31T10:00');
     noerror(activity.addEvent({ command: 'startWork', timestamp }));
 
     // 出勤時より早い時間のEventを追加
@@ -77,6 +86,7 @@ describe('DailyActivity', () => {
   });
 
   it('can make from workEvent array', () => {
+    const worker = Worker.createWorker('test');
     const events: WorkEvent[] = [
       { command: 'startWork', timestamp: Minute.fromDateString('2022-05-31T10:30') },
       { command: 'startRest', timestamp: Minute.fromDateString('2022-05-31T13:00') },
@@ -86,7 +96,7 @@ describe('DailyActivity', () => {
       { command: 'finishWork', timestamp: Minute.fromDateString('2022-05-31T20:30') },
     ];
 
-    const [activity, error] = DailyActivity.fromEvents(events);
+    const [activity, error] = DailyActivity.fromEvents(worker.id, Day.fromDateString('2022-05-31'), events);
     expect(error).toBe(undefined);
     expect(activity).not.toBe(undefined);
   });

@@ -29,7 +29,7 @@ export class InMemoryWorkEventRepo implements WorkEventRepo {
         return a.timestamp.diff(b.timestamp);
       });
 
-    const [activity, error] = DailyActivity.fromEvents(events.map(toWorkEvent));
+    const [activity, error] = DailyActivity.fromEvents(workerId, date, events.map(toWorkEvent));
 
     if (error) {
       throw error;
