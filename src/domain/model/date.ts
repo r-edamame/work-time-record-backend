@@ -37,6 +37,14 @@ export class Minute {
   static fromDateString(date: string): Minute {
     return new Minute(dayjs(date));
   }
+
+  format(): string {
+    return this._minute.format('YYYY-MM-DDTHH:mm');
+  }
+
+  now(): Minute {
+    return new Minute(dayjs());
+  }
 }
 
 export class Day {
@@ -78,6 +86,14 @@ export class Day {
   static fromDateString(date: string): Day {
     return new Day(dayjs(date));
   }
+
+  format(): string {
+    return this._day.format('YYYY-MM-DD');
+  }
+
+  now(): Day {
+    return new Day(dayjs());
+  }
 }
 
 export class Month implements HasDayRange {
@@ -118,6 +134,14 @@ export class Month implements HasDayRange {
 
   static fromDateString(date: string): Month {
     return new Month(dayjs(date));
+  }
+
+  format(): string {
+    return this._month.format('YYYY-MM');
+  }
+
+  now(): Month {
+    return new Month(dayjs());
   }
 }
 
