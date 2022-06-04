@@ -1,6 +1,6 @@
 import { DailyActivity } from '@domain/model/daily-activity';
 import { Day, HasDayRange } from '@domain/model/date';
-import { WorkEvent } from '@domain/model/work-event';
+import { isSameEvent, WorkEvent } from '@domain/model/work-event';
 import { WorkEventRepo } from '@domain/repo/work-event-repo';
 import { removeWithIndicies } from '@util/array';
 
@@ -56,13 +56,11 @@ export class InMemoryWorkEventRepo implements WorkEventRepo {
         return e.workerId === workerId && date.in(e.timestamp);
       });
 
-    const same = (a: WorkEvent, b: WorkEvent): boolean => a.command === b.command && a.timestamp.isSame(b.timestamp);
-
     const unsavedEvents = events.filter((e) => {
-      return stored.find(([d, ix]) => same(e, d)) === undefined;
+      return stored.find(([d, ix]) => isSameEvent(e, d)) === undefined;
     });
     const lostEvents = stored.filter(([e, ix]) => {
-      return events.find((d) => same(e, d)) === undefined;
+      return events.find((d) => isSameEvent(e, d)) === undefined;
     });
 
     this.workEvents = removeWithIndicies(
