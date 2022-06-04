@@ -55,8 +55,18 @@ export class DailyActivity {
   }
 
   static fromEvents(workerId: string, day: Day, events: WorkEvent[]): Either<DailyActivity> {
+    const sorted = [...events].sort((e1, e2) => {
+      if (e1.timestamp.isAfter(e2.timestamp)) {
+        return 1;
+      } else if (e2.timestamp.isAfter(e1.timestamp)) {
+        return -1;
+      } else {
+        return 0;
+      }
+    });
+
     const activity = DailyActivity.new(workerId, day);
-    for (const event of events) {
+    for (const event of sorted) {
       const [_status, error] = activity.addEvent(event);
       if (error) {
         return [undefined, error];
